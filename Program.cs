@@ -1,9 +1,51 @@
 ﻿using Blog.Data;
 using Blog.Models;
+using Microsoft.EntityFrameworkCore;
 
 using var context = new BlogDataContext();
 
-RegisterPost(context);
+UpdatePost(context);
+GetPosts(context);
+
+static void GetPosts(BlogDataContext context)
+{
+    var post = context.Posts
+                .AsNoTracking()
+                .Include(p => p.Author)
+                .Include(p => p.Category)
+                .FirstOrDefault();
+
+    if(post is null)
+    {
+        Console.WriteLine("Nenhum post encontrado");
+        return;
+    }
+
+    Console.WriteLine($"- Id: {post.Id} \n" +
+                      $"- Título: {post.Title} \n" +
+                      $"- Autor: {post.Author?.Name} \n" +
+                      $"- Categoria: {post.Category?.Name}");
+}
+
+static void UpdatePost(BlogDataContext context)
+{
+    var post = context.Posts
+                .AsNoTracking()
+                .Include(p => p.Author)
+                .Include(p => p.Category)
+                .FirstOrDefault();
+
+    if (post is null || post.Author is null)
+    {
+        Console.WriteLine("Nenhum post encontrado");
+        return;
+    }
+
+    post.Author.Name = "Nome teste";
+
+    context.Posts.Update(post);
+    context.SaveChanges();
+}
 
 static void RegisterPost(BlogDataContext context)
 {
